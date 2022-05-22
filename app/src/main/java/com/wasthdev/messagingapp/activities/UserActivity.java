@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.wasthdev.messagingapp.adapters.UserAdapter;
@@ -22,12 +22,13 @@ public class UserActivity extends AppCompatActivity implements UserListener {
 
     private ActivityUserBinding binding;
     private PreferenceManager preferenceManager;
-
+    FirebaseDatabase databaseFR;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityUserBinding.inflate(getLayoutInflater());
         preferenceManager = new PreferenceManager(getApplicationContext());
+        databaseFR = FirebaseDatabase.getInstance();
         setContentView(binding.getRoot());
         listeners();
         getUsers();
@@ -93,4 +94,5 @@ public class UserActivity extends AppCompatActivity implements UserListener {
         startActivity(intent);
         finish();
     }
+
 }

@@ -17,7 +17,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.wasthdev.messagingapp.R;
 import com.wasthdev.messagingapp.adapters.RecentConversionAdapter;
 import com.wasthdev.messagingapp.databinding.ActivityMainBinding;
 import com.wasthdev.messagingapp.listeners.ConversationListener;

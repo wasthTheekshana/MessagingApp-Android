@@ -8,8 +8,12 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -40,6 +44,9 @@ public class ChatActivity extends AppCompatActivity {
     private PreferenceManager preferenceManager;
     private FirebaseFirestore database;
     private String conversionId = null;
+    FirebaseDatabase databaseFR;
+    DatabaseReference myRef;
+
 
 
     @Override
@@ -47,10 +54,12 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        databaseFR = FirebaseDatabase.getInstance();
         setListeners();
         loadReceiverDetails();
         init();
         listenMessage();
+        myRef = FirebaseDatabase.getInstance().getReference(preferenceManager.getString(Constants.KEY_USER_ID)+"addNew");
     }
 
     private void init(){
@@ -63,7 +72,7 @@ public class ChatActivity extends AppCompatActivity {
         );
         binding.chatRecyclerView.setAdapter(chatAdapter);
         database = FirebaseFirestore.getInstance();
-
+        addFriend(receiverUser);
     }
 
     private void sendMessage(){
@@ -148,6 +157,47 @@ public class ChatActivity extends AppCompatActivity {
     private void loadReceiverDetails(){
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         binding.textName.setText(receiverUser.name);
+
+    }
+
+    public void addFriend(User user){
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        database.collection(Constants.KEY_COLLECTION_USERS)
+                .whereEqualTo("email",user.email).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<User> list = queryDocumentSnapshots.toObjects(User.class);
+                    if (list.size() > 0){
+                        User u = list.get(0);
+                        String e=u.email;
+
+
+                        myRef.orderByKey().get().addOnSuccessListener(dataSnapshot -> {
+                            if(dataSnapshot.hasChildren()){
+                                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                                    String fid=ds.getKey();
+                                    assert fid != null;
+                                    if(fid.equals(u.id)){
+                                        Toast.makeText(getApplicationContext(), "Already Added", Toast.LENGTH_SHORT).show();
+                                    }else if(!user.email.equals(e)){
+                                        Toast.makeText(getApplicationContext(), "You", Toast.LENGTH_SHORT).show();
+
+                                    }else{
+                                        myRef.child(user.id).setValue(user);
+                                        Toast.makeText(getApplicationContext(), "Already Added", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                }
+                            }else if(user.email.equals(e)){
+                                myRef.child(user.id).setValue(user);
+                                Toast.makeText(getApplicationContext(), "Already Added", Toast.LENGTH_SHORT).show();
+
+                            }else{
+                                Toast.makeText(getApplicationContext(), "You", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+                    }
+
+                });
     }
 
     private void setListeners(){
